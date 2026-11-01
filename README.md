@@ -9,7 +9,7 @@ Estructura general del proyecto (sin archivos `.h`). El detalle de funciones de 
 ```
 ProyectoEDA2/
 ├── src/
-│   ├── Utilidades.cpp       # constantes, fechas, split, hashString, cronómetro
+│   ├── Utilidades.cpp       # constantes, fechas, split, hashString
 │   ├── Pedido.cpp           # struct Pedido + comparadores
 │   ├── HashTable.cpp        # HashNode + HashTable
 │   ├── MaxHeap.cpp          # MaxHeap (arreglo de Pedido*)
@@ -45,39 +45,27 @@ Hash, Heap y Árbol **no se conocen entre sí**. Solo `Sistema` los une.
 
 ---
 
-## 3. Cómo funciona sin `.h`
+## 3. Cómo se arma el programa final (un solo main)
 
-Sin headers, un `.cpp` no ve a otro. La solución:
-
-1. Cada `.cpp` empieza con `#pragma once` (evita inclusión doble).
-2. Cada `.cpp` hace `#include "OtroArchivo.cpp"` de lo que necesita.
-3. **Solo `main.cpp` se compila.**
-
-Plantilla al inicio de cada archivo (ejemplo `HashTable.cpp`):
-
-```cpp
-#pragma once
-#include <iostream>
-#include <string>
-using namespace std;
-
-#include "Pedido.cpp"
-#include "Utilidades.cpp"
-```
-
-`main.cpp`:
-
-```cpp
-#include "Sistema.cpp"   // arrastra todo lo demás
-```
-
-Compilar:
+Cada integrante trabaja en su propio archivo, y al final **todo se pega en un único `main.cpp`** en este orden:
 
 ```
-g++ main.cpp -o sistema
+1. #include <iostream>, <string>, <vector> + using namespace std;
+2. Utilidades
+3. Pedido
+4. HashTable
+5. MaxHeap
+6. RedBlackTree
+7. Sistema
+8. main()
 ```
 
-Si compilan todos los `.cpp` juntos aparecen errores de "definición múltiple". En Visual Studio o Code::Blocks, marquen los demás archivos como *Excluir de la compilación*.
+Reglas para que el pegado salga sin errores:
+
+- Cada bloque solo usa lo que está **antes** en el orden.
+- Los `#include` y `using namespace std;` repetidos al inicio de cada archivo se borran al pegar (dejar uno solo arriba).
+- Los archivos sueltos no llevan `#include` de otros archivos ni guards.
+- Cada uno prueba su parte pegando antes lo que necesita (como mínimo `Utilidades` y `Pedido`).
 
 ---
 
@@ -135,7 +123,7 @@ Los destructores de las 3 estructuras **nunca** hacen `delete` de los `Pedido`. 
 - **Estados (lista única, constantes en `Utilidades.cpp`):** `Pendiente`, `EnTransito`, `Entregado`, `Cancelado`. *(Confirmar entre los 3 antes de programar; el enunciado sugiere Iniciado, Enviado, En camino, Entregado, Cancelado.)*
 - **Rango de fechas:** el usuario da `2026-06-01`; convertir a clave inicial con `000000` y final con `235959`.
 - **Contadores** (`totalPedidos`, `montoAcumulado`): solo se tocan dentro de `Sistema`, nunca dentro de las estructuras.
-- **Tiempos:** `chrono` solo en `Sistema`/`main`, nunca dentro de las estructuras.
+- **Tiempos:** se miden solo en `Sistema`/`main`, nunca dentro de las estructuras.
 
 ---
 
