@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+
+#pragma once  /* para que no se repitan*/
 #include "Utilidades.cpp"
 
 using namespace std;

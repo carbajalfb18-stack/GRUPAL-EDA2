@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
+
 #include "Pedido.cpp"
+#pragma once
 
 using namespace std;
  

@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
+
 #include "Pedido.cpp"
+#pragma once            /* para que no se repitan cuando terminemos ponemos todo junto y se quita */
+
 using namespace std;
  
 // ============================================================

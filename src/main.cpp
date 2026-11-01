@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <vector>   // solo si siguen usando vector en el hash
+#include <vector>   
 
 #include "Sistema.cpp"
 

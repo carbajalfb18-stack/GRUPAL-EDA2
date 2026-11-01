@@ -2,10 +2,12 @@
 #include <string>
 using namespace std;
 
+#include "Utilidades.cpp"
 #include "Pedido.cpp"
 #include "HashTable.cpp"
 #include "MaxHeap.cpp"
 #include "RedBlackTree.cpp"
+#pragma once 
  
 // ============================================================
 //  Sistema.cpp  -  depende de: HashTable, MaxHeap, RedBlackTree, Utilidades
