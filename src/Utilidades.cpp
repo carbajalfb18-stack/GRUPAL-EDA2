@@ -43,8 +43,9 @@ long long claveFinDia(const string& fecha) {
     return calcularClaveFecha(fecha, "23:59:59");
 }
  
+// todos los datos se ven en el csv los numeros tambien por si hay dudas de porque hay 10 u 8 caracteres;
 bool esFechaValida(const string& fecha) {
-    if (fecha.length() != 10) return false;
+    if (fecha.length() != 10) return false; // Formato esperado: YYYY-MM-DD
     if (fecha[4] != '-' || fecha[7] != '-') return false;
 
     int i = 0;
@@ -74,19 +75,62 @@ bool esFechaValida(const string& fecha) {
     return true;
 }
  
+// mismo formato de la funcion esFechaValida, pero para la hora
 bool esHoraValida(const string& hora) {
-    // TODO
-    return false;
+    if (hora.length() != 8) return false;  // Formato esperado: HH:MM:SS
+    if (hora[2] != ':' || hora[5] != ':') return false; // esto comprueba que los : esten en la posicion correcta
+
+    int i = 0;
+    while (i < 8) { 
+        if (i == 2 || i == 5) {
+            if (hora[i] < '0' || hora[i] > '9') return false;
+        }
+        i++;
+    }
+
+    int horaNum = (hora[0] - '0') * 10 + (hora[1] - '0');
+    int minutoNum = (hora[3] - '0') * 10 + (hora[4] - '0');
+    int segundoNum = (hora[6] - '0') * 10 + (hora[7] - '0');
+
+    if (horaNum < 0 || horaNum > 23) return false;
+    if (minutoNum < 0 || minutoNum > 59) return false;
+    if (segundoNum < 0 || segundoNum > 59) return false;
+
+    return true;
 }
  
 int dividirLinea(const string& linea, string campos[], int maxCampos) {
-    // TODO
-    return 0;
+    int contador = 0;
+    string espaciado = "";
+    int i = 0;
+    int largo = linea.length();
+
+    while (i < largo && contador < maxCampos) {
+        if (linea[i] == ',') {
+            campos[contador] = espaciado;
+            contador++;
+            espaciado = "";
+        } else {
+            espaciado += linea[i];
+        }
+        i++;
+    }
+    if (contador < maxCampos) {
+        campos[contador] = espaciado;
+        contador++;
+    }
+    return contador;
 }
  
 unsigned long hashString(const string& s) {
-    // TODO
-    return 0;
+    unsigned long total = 0;
+    int i = 0;
+    int largo = s.length();
+    while (i < largo) {
+        total = total * 31 + s[i];  // 31 salvador :)
+        i++;
+    }
+    return total;
 }
 
 int textoAEntero(const string& s) {
