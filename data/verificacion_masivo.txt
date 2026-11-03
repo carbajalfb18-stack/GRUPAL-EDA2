@@ -1,0 +1,20 @@
+VERIFICACION de pedidos_masivo.csv  (semilla: 278512619)
+
+--- Estadisticas esperadas tras la carga ---
+Total de pedidos:       10000
+Pedidos en el heap:     10000
+Monto total acumulado:  3579708.61
+
+--- Busqueda por ID ---
+Primero:   PD-000001
+Ultimo:    PD-010000
+Inventado: PD-999999 (no debe existir)
+
+--- Despacho: las 10 prioridades mas altas (en orden) ---
+10, 10, 10, 10, 10, 10, 10, 10, 10, 10
+
+--- Consultas por rango (inclusive) ---
+Rango de una semana: 2026-07-06 a 2026-07-12  ->  cantidad = 448,  monto = 160500.15
+Rango de un mes: 2026-08-01 a 2026-08-31  ->  cantidad = 2055,  monto = 720284.92
+Rango de alta densidad (un dia): 2026-09-15 a 2026-09-15  ->  cantidad = 66,  monto = 20852.86
+Rango sin resultados: 2027-01-01 a 2027-01-31  ->  cantidad = 0,  monto = 0.00

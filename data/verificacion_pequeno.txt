@@ -1,0 +1,19 @@
+VERIFICACION de pedidos_pequeno.csv  (semilla: 278512619)
+
+--- Estadisticas esperadas tras la carga ---
+Total de pedidos:       30
+Pedidos en el heap:     30
+Monto total acumulado:  13164.97
+
+--- Busqueda por ID ---
+Primero:   PD-000001
+Ultimo:    PD-000030
+Inventado: PD-999999 (no debe existir)
+
+--- Despacho: las 10 prioridades mas altas (en orden) ---
+10, 10, 9, 9, 9, 7, 7, 7, 7, 6
+
+--- Consultas por rango (inclusive) ---
+Rango 1 (3 dias): 2026-06-01 a 2026-06-03  ->  cantidad = 14,  monto = 4895.12
+Rango 2 (1 semana): 2026-06-01 a 2026-06-07  ->  cantidad = 25,  monto = 11110.07
+Rango sin resultados: 2027-01-01 a 2027-01-31  ->  cantidad = 0,  monto = 0.00
