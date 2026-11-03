@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 using namespace std;
+#pragma once
  
 // ============================================================
 //  Utilidades.cpp  -  no depende de ningún otro archivo
