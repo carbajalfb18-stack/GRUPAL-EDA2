@@ -15,10 +15,13 @@ ProyectoEDA2/
 │   ├── MaxHeap.cpp          # MaxHeap (arreglo de Pedido*)
 │   ├── RedBlackTree.cpp     # NodoRB + ArbolRedBlack
 │   ├── Sistema.cpp          # une las 3 estructuras + cargarCSV
-│   └── main.cpp             # menú + pruebas de tiempos
+│   └── main.cpp             # menú + pruebas
 ├── data/
-│   ├── pedidos_pequeno.csv  # 20 a 50 pedidos
-│   └── pedidos_masivo.csv   # 10,000 o más pedidos
+│   ├── pedidos_pequeno.csv       # 20 a 50 pedidos
+│   ├── pedidos_masivo.csv        # 10,000 o más pedidos
+│   ├── verificacion_pequeno.txt  # resultados esperados (para comparar)
+│   └── verificacion_masivo.txt
+├── generar_datos.py         # genera los CSV y los archivos de verificación
 └── informe/
     └── informe_IEEE.pdf
 ```
@@ -38,19 +41,31 @@ Cada archivo solo puede usar lo que está **antes** en esta lista:
 | 3 | `HashTable.cpp` | Pedido, Utilidades |
 | 4 | `MaxHeap.cpp` | Pedido |
 | 5 | `RedBlackTree.cpp` | Pedido |
-| 6 | `Sistema.cpp` | HashTable, MaxHeap, RedBlackTree, Utilidades |
+| 6 | `Sistema.cpp` | Utilidades, Pedido, HashTable, MaxHeap, RedBlackTree |
 | 7 | `main.cpp` | Sistema |
 
 Hash, Heap y Árbol **no se conocen entre sí**. Solo `Sistema` los une.
 
 ---
 
-## 3. Cómo se arma el programa final (un solo main)
+## 3. Cómo se arma el programa
 
-Cada integrante trabaja en su propio archivo, y al final **todo se pega en un único `main.cpp`** en este orden:
+### Fase 1: mientras trabajan (archivos separados)
+
+Así están los archivos ahora:
+
+- Cada `.cpp` lleva `#pragma once` (para que no se incluya dos veces).
+- Cada `.cpp` hace `#include "Otro.cpp"` de los archivos de los que depende (según la tabla de la sección 2).
+- `main.cpp` hace `#include "Sistema.cpp"`, que arrastra todo lo demás.
+- **Solo se compila `main.cpp`:** `g++ main.cpp -o sistema`. Si se agregan los demás `.cpp` a la compilación, sale error de "definición múltiple".
+- Cada uno prueba su parte con un `main` temporal que incluya su archivo.
+
+### Fase 2: entrega (un solo `main.cpp`)
+
+Se pega todo en un único archivo, en este orden:
 
 ```
-1. #include <iostream>, <string>, <vector> + using namespace std;
+1. #include <iostream>, <string> + using namespace std;
 2. Utilidades
 3. Pedido
 4. HashTable
@@ -60,12 +75,12 @@ Cada integrante trabaja en su propio archivo, y al final **todo se pega en un ú
 8. main()
 ```
 
-Reglas para que el pegado salga sin errores:
+Y se borra:
 
-- Cada bloque solo usa lo que está **antes** en el orden.
-- Los `#include` y `using namespace std;` repetidos al inicio de cada archivo se borran al pegar (dejar uno solo arriba).
-- Los archivos sueltos no llevan `#include` de otros archivos ni guards.
-- Cada uno prueba su parte pegando antes lo que necesita (como mínimo `Utilidades` y `Pedido`).
+- Todos los `#include "...cpp"`.
+- Todos los `#pragma once`.
+- Los `#include <...>` y `using namespace std;` repetidos (queda uno solo arriba).
+- `#include <vector>` solo se deja si el hash lo sigue usando (ver sección 7).
 
 ---
 
@@ -113,39 +128,60 @@ Los destructores de las 3 estructuras **nunca** hacen `delete` de los `Pedido`. 
 6. Cuando `extraerMax` encuentre un `Cancelado`, lo descarta y ahí sí hace `delete`.
 7. Actualizar `totalPedidos` y `montoAcumulado` en `Sistema`.
 
+### Ojo con las estadísticas
+
+El enunciado define "pendientes por despachar" como el tamaño del heap. Pero un pedido cancelado sigue dentro del heap hasta que `extraerMax` lo descarte, así que `getTamano()` lo contaría de más. Hay que decidirlo entre los 3 antes de programar `mostrarEstadisticas`:
+
+- **Opción A:** `Sistema` lleva un contador de pendientes que baja al cancelar o despachar (y se muestra ese, no `getTamano()`).
+- **Opción B:** el heap lleva su propio contador de cancelados y `getTamano()` lo descuenta.
+
 ---
 
 ## 7. Acuerdos que los 3 deben respetar
 
 - **Clave del hash:** `idPedido` (string, ejemplo `PD-000001`).
 - **Clave del heap:** `nivelPrioridad` (mayor sale primero).
-- **Clave del árbol:** `claveFecha` (ejemplo `20260601083000`); si empatan, desempata por `idPedido`.
-- **Estados (lista única, constantes en `Utilidades.cpp`):** `Pendiente`, `EnTransito`, `Entregado`, `Cancelado`. *(Confirmar entre los 3 antes de programar; el enunciado sugiere Iniciado, Enviado, En camino, Entregado, Cancelado.)*
-- **Rango de fechas:** el usuario da `2026-06-01`; convertir a clave inicial con `000000` y final con `235959`.
+- **Clave del árbol:** `claveFecha` (ejemplo `20260601083000`, la calcula `calcularClaveFecha`); si empatan, desempata por `idPedido` (`compararPedidos`).
+- **Estados (constantes en `Utilidades.cpp`):** `Pendiente`, `EnTransito`, `Entregado`, `Cancelado`. *(El enunciado sugiere Iniciado, Enviado, En camino, Entregado, Cancelado: confirmar si se cambia.)*
+- **Rango de fechas:** el usuario da `2026-06-01`; `claveInicioDia` lo convierte a `...000000` y `claveFinDia` a `...235959`.
 - **Contadores** (`totalPedidos`, `montoAcumulado`): solo se tocan dentro de `Sistema`, nunca dentro de las estructuras.
 - **Tiempos:** se miden solo en `Sistema`/`main`, nunca dentro de las estructuras.
+- **`vector` (pendiente de decidir):** el enunciado no lo prohíbe, pero pide estructuras "creadas desde cero con punteros". Lo más seguro es que la tabla del hash sea `HashNode**` (con `new` y `delete[]`) y no usar `vector`.
 
 ---
 
-## 8. Reparto sugerido
+## 8. Estado y reparto
 
-| Integrante | Archivo principal | Archivos de apoyo |
-|-----------|-------------------|-------------------|
-| 1 | `HashTable.cpp` | `Utilidades.cpp` (`hashString`) |
-| 2 | `MaxHeap.cpp` | `Pedido.cpp` |
-| 3 | `RedBlackTree.cpp` | `Utilidades.cpp` (fechas) |
-| Todos | `Sistema.cpp`, `main.cpp`, informe | |
+| Archivo | Estado | Responsable |
+|---------|--------|-------------|
+| `Utilidades.cpp` | implementado | |
+| `Pedido.cpp` | esqueleto | |
+| `HashTable.cpp` | **vacío** | Integrante 1 |
+| `MaxHeap.cpp` | esqueleto | Integrante 2 |
+| `RedBlackTree.cpp` | esqueleto | Integrante 3 |
+| `Sistema.cpp`, `main.cpp`, informe | esqueleto | Todos |
 
-Cada uno prueba su estructura con un `main` temporal **fuera** de `src/`. Nadie modifica `Pedido.cpp` ni `Utilidades.cpp` sin avisar.
+Nadie modifica `Pedido.cpp` ni `Utilidades.cpp` sin avisar.
 
 ---
 
-## 9. Pruebas obligatorias (para `main.cpp`)
+## 9. Dónde va el CSV
+
+El CSV no va dentro del código: es un archivo aparte y se abre desde `main` con `sistema.cargarCSV("data/pedidos_masivo.csv");`.
+
+- El programa debe ejecutarse **desde la carpeta que contiene `data/`**, o la ruta no se encuentra.
+- Si `cargarCSV` retorna 0, casi seguro no abrió el archivo (ruta o carpeta equivocada).
+- Mejor no usar rutas absolutas (`C:/Users/...`): fallan en otra computadora.
+- Los CSV se generan con `python generar_datos.py` (crea la carpeta `data/` junto al script).
+
+---
+
+## 10. Pruebas obligatorias (para `main.cpp`)
 
 1. Carga masiva con tiempo (Hash + Árbol + Heap).
 2. Búsqueda: primero del archivo, último y uno inventado, con milisegundos.
 3. Despacho de los 10 más urgentes y verificar prioridades.
-4. Rango: una semana, un mes y uno sin resultados; verificar el monto.
+4. Rango: una semana, un mes y uno sin resultados; verificar el monto (comparar con `verificacion_masivo.txt`).
 5. Inserción individual y verificar en hash y árbol.
 6. Actualizar estado de 10 pedidos.
 7. Cancelar 10 pedidos y verificar que el hash ya no los encuentra.
