@@ -25,8 +25,17 @@ struct Pedido {
 };
  
 Pedido* crearPedido(string id, string dni, string tipo, int prioridad, double monto, string fecha, string hora, string estado) {
-    // TODO
-    return nullptr;
+    Pedido* p = new Pedido;
+    p->idPedido        = id;
+    p->dniCliente      = dni;
+    p->tipoEnvio       = tipo;
+    p->nivelPrioridad  = prioridad;
+    p->montoDolares    = monto;
+    p->fecha           = fecha;
+    p->hora            = hora;
+    p->estado          = estado;
+    p->claveFecha      = calcularClaveFecha(fecha, hora);
+    return p;
 }
  
 Pedido* crearPedidoDesdeCampos(string campos[]) {
@@ -35,15 +44,20 @@ Pedido* crearPedidoDesdeCampos(string campos[]) {
 }
  
 void mostrarPedido(const Pedido* p) {
-    // TODO
+    cout << p->idPedido << " " << p->dniCliente << " " << p->tipoEnvio << " "
+         << p->nivelPrioridad << " " << p->montoDolares << " "
+         << p->fecha << " " << p->hora << " " << p->estado
+         << endl;   
 }
  
 int compararPedidos(const Pedido* a, const Pedido* b) {
-    // TODO
+    if (a->claveFecha < b->claveFecha) return -1;
+    if (a->claveFecha > b->claveFecha) return 1;
+    if (a->idPedido < b->idPedido) return -1;
+    if (a->idPedido > b->idPedido) return 1;
     return 0;
 }
  
 bool mayorPrioridad(const Pedido* a, const Pedido* b) {
-    // TODO
-    return false;
+    return a->nivelPrioridad > b->nivelPrioridad;
 }
