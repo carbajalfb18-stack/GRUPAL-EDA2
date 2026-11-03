@@ -39,8 +39,10 @@ Pedido* crearPedido(string id, string dni, string tipo, int prioridad, double mo
 }
  
 Pedido* crearPedidoDesdeCampos(string campos[]) {
-    // TODO
-    return nullptr;
+    int prioridad = textoAEntero(campos[3]);
+    double monto  = textoADecimal(campos[4]);
+    return crearPedido(campos[0], campos[1], campos[2], prioridad, monto,
+                       campos[5], campos[6], campos[7]);
 }
  
 void mostrarPedido(const Pedido* p) {
