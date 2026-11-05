@@ -9,7 +9,7 @@ using namespace std;
 // ============================================================
 //  Pedido.cpp  -  depende de: Utilidades
 //  Todas las estructuras guardan Pedido* (un solo objeto por pedido).
-//  NO modificar este struct sin avisar a los 3.
+//  NO modificar este struct sin avisar.
 // ============================================================
  
 struct Pedido {

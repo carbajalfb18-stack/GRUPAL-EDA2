@@ -50,7 +50,7 @@ bool esFechaValida(const string& fecha) {
 
     int i = 0;
     while (i < 10) {
-        if (i == 4 || i == 7) {
+        if (i != 4 && i != 7) {
             if (fecha[i] < '0' || fecha[i] > '9') return false;
         }
         i++;
@@ -82,7 +82,7 @@ bool esHoraValida(const string& hora) {
 
     int i = 0;
     while (i < 8) { 
-        if (i == 2 || i == 5) {
+        if (i != 2 && i != 5) {
             if (hora[i] < '0' || hora[i] > '9') return false;
         }
         i++;
