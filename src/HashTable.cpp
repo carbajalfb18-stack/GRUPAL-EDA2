@@ -76,4 +76,9 @@ public:
         // TODO
         return 0;
     }
+
+    void liberarPedidos() {
+    // TODO: recorrer todos los buckets y hacer delete de cada Pedido (valor)
+    }
+
 };

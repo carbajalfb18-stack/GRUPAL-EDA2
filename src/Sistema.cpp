@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream> // leer archivo csv
 using namespace std;
 
 #include "Utilidades.cpp"
@@ -26,56 +27,126 @@ private:
  
 public:
     Sistema() : hash(20011), heap(1024) {
-        // TODO: inicializar totalPedidos y montoAcumulado en 0
+        totalPedidos = 0;
+        montoAcumulado = 0;
     }
  
     ~Sistema() {
-        // TODO: liberar los Pedido que sigan en el hash
+        hash.liberarPedidos();  
         //       (los cancelados los libera el heap al extraerlos)
     }
  
     int cargarCSV(const string& ruta) {
-        // TODO
-        return 0;
+        ifstream archivo;                      // Abre el archivo CSV    algo nuevo para mi
+        archivo.open(ruta.c_str());           // c_str() convierte string a const char* para open()
+        if (!archivo.is_open()) {
+            cout << "No se pudo abrir el archivo: " << ruta << endl;
+            return 0;
+        }
+        string linea;
+        string campos[8];
+        int cargados = 0;
+ 
+        while (getline(archivo, linea)) {
+            int n = dividirLinea(linea, campos, 8);
+            if (n == 8) {
+                Pedido* p = crearPedidoDesdeCampos(campos);
+                if (registrarPedido(p)) {
+                    cargados++;
+                }
+            }
+        }
+        archivo.close();
+        return cargados;
     }
  
     bool registrarPedido(Pedido* p) {
-        // TODO
-        return false;
+        
+        if(!esFechaValida(p->fecha)) {
+            delete p;  
+            return false;
+        }
+
+        hash.insertar(p);
+        heap.insertar(p);
+        totalPedidos++;
+        montoAcumulado += p->montoDolares;   // suma los montos de los pedidos registrados
+
+        return true;
     }
  
     void buscarPorId(const string& id) {
-        // TODO
+        Pedido* p = hash.buscar(id);
+        if(p == nullptr){
+            cout << "Pedido no encontrado" << endl;
+        } else {
+            mostrarPedido(p);
+        }
     }
  
     void despacharLote(int n) {
-        // TODO
+        for(int i = 0; i < n; i++) {
+            Pedido* p = heap.extraerMax();
+
+            if(p == nullptr) {
+                cout << "No hay más pedidos para despachar" << endl;
+                return;
+            }
+            
+            p->estado = "ESTADO_TRANSITO";
+            mostrarPedido(p);
+      
+        }
     }
  
     void consultaOrdenada() {
-        // TODO
+        arbol.inOrder(30);  // 0 significa sin límite si hay fallas modificar el inOrderHelper 
     }
  
     void consultaRango(const string& fechaIni, const string& fechaFin) {
-        // TODO
+        int cantidad = 0;
+        double montoTotal = 0.0;
+
+        arbol.consultaRango(claveInicioDia(fechaIni), claveFinDia(fechaFin), cantidad, montoTotal);
+        cout << "Cantidad de pedidos: " << cantidad << endl;
+
+        cout << "Monto total: " << montoTotal << endl;
     }
  
     bool actualizarEstado(const string& id, const string& nuevoEstado) {
-        // TODO
-        return false;
+        Pedido* p = hash.buscar(id);
+
+        if(p == nullptr) {
+            cout << "Pedido no encontrado" << endl;
+            return false;
+        }
+        p->estado = nuevoEstado;
+        return true;
     }
  
     bool cancelarPedido(const string& id) {
-        // TODO
-        return false;
+        Pedido* p = hash.buscar(id);
+        if(p == nullptr) {
+            cout << "Pedido no encontrado" << endl;
+            return false;
+        }
+        hash.eliminar(id);
+        arbol.eliminar(p);
+
+        p->estado = "ESTADO_CANCELADO";
+        totalPedidos--;
+        montoAcumulado -= p->montoDolares;  
+
+        return true;
     }
  
     void mostrarEstadisticas() {
-        // TODO
+        cout << "Total de pedidos: " << totalPedidos << endl;
+        cout << "Pendiente por revision: " << heap.getTamano() << endl;
+        cout << "Monto total acumulado: " << montoAcumulado << endl;
     }
  
     int getColisiones() {
-        // TODO
-        return 0;
+        return hash.getColisiones();
     }
 };
