@@ -19,7 +19,7 @@ using namespace std;
  
 class Sistema {
 private:
-    HashTable     hash;
+    TablaHash     hash;
     MaxHeap       heap;
     ArbolRedBlack arbol;
     int           totalPedidos;
@@ -67,7 +67,7 @@ public:
             return false;
         }
 
-        hash.insertar(p);
+        hash.insertar(p->idPedido,p);
         heap.insertar(p);
         totalPedidos++;
         montoAcumulado += p->montoDolares;   // suma los montos de los pedidos registrados

@@ -57,18 +57,18 @@ bool esFechaValida(const string& fecha) {
     }
     
     i = 4;    
-    int año = (fecha[0] - '0') * 1000 + (fecha[1] - '0') * 100 + (fecha[2] - '0') * 10 + (fecha[3] - '0');
+    int anio = (fecha[0] - '0') * 1000 + (fecha[1] - '0') * 100 + (fecha[2] - '0') * 10 + (fecha[3] - '0');
     int mes = (fecha[5] - '0') * 10 + (fecha[6] - '0');
     int dia = (fecha[8] - '0') * 10 + (fecha[9] - '0');
 
-    if (año < 1900 || año > 2100) return false;
+    if (anio < 1900 || anio > 2100) return false;
     if (mes < 1 || mes > 12) return false;
     if (dia < 1 || dia > 31) return false;
 
     if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) return false;
     
     if (mes == 2) {
-        bool esBisiesto = (año % 4 == 0 && año % 100 != 0) || (año % 400 == 0);
+        bool esBisiesto = (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
         if (esBisiesto && dia > 29) return false;
         if (!esBisiesto && dia > 28) return false;
     }
