@@ -68,7 +68,7 @@ private:
     PropietarioPedidos propietario;
     MaxHeap       heap;
     LimpiezaHeap  limpiezaHeap;
-    HashTable     hash;
+    TablaHash     hash;
     ArbolRedBlack arbol;
     int           totalPedidos;
     double        montoAcumulado;
@@ -199,7 +199,7 @@ public:
  
     bool registrarPedido(Pedido* p) {
         // false: el llamador conserva p; true: Sistema adquiere su propiedad.
-        // Hash::insertar(false) no debe guardar ni liberar el puntero.
+        // TablaHash::insertar devuelve void y no adquiere propiedad de Pedido.
         // Precondicion: p es nuevo y no pertenece ya a otro sistema/estructura.
         // Excepciones: el llamador NO debe borrar p. Antes de publicarlo se libera
         // por RAII; despues de publicarlo Sistema lo conserva hasta el cierre.
@@ -221,11 +221,7 @@ public:
         RegistroPropiedad* registro = new RegistroPropiedad(p, propietario.primero);
         propietario.primero = registro;
         candidato.release();
-        if (!hash.insertar(p)) {
-            propietario.primero = registro->siguiente;
-            delete registro; // solo metadatos: el llamador conserva p
-            return false;
-        }
+        hash.insertar(p->idPedido, p);
         p->claveFecha = claveFecha;
         // PENDIENTE GRUPO: heap/arbol insertan con retorno void. Hace falta
         // acordar garantias de excepcion y una forma segura de revertir; el heap
@@ -240,12 +236,8 @@ public:
     }
  
     void buscarPorId(const string& id) {
-        Pedido* p = hash.buscar(id);
-        if(p == nullptr){
-            cout << "Pedido no encontrado" << endl;
-        } else {
-            mostrarPedido(p);
-        }
+        // TablaHash::buscar ya imprime el pedido o informa que no existe.
+        hash.buscar(id);
     }
  
     void despacharLote(int n) {
@@ -312,7 +304,7 @@ public:
         Pedido* p = hash.buscar(id);
 
         if(p == nullptr) {
-            cout << "Pedido no encontrado" << endl;
+            // La tabla ya informa que no encontro el pedido.
             return false;
         }
         if (p->estado == ESTADO_CANCELADO) {
@@ -326,7 +318,7 @@ public:
     bool cancelarPedido(const string& id) {
         Pedido* p = hash.buscar(id);
         if(p == nullptr) {
-            cout << "Pedido no encontrado" << endl;
+            // La tabla ya informa que no encontro el pedido.
             return false;
         }
         if (p->estado == ESTADO_CANCELADO) {
@@ -344,7 +336,10 @@ public:
         while (*enlace != nullptr && (*enlace)->pedido != p) {
             enlace = &(*enlace)->siguiente;
         }
-        if (!hash.eliminar(id)) {
+        hash.eliminar(id);
+        // eliminar devuelve void: comprobar la ausencia antes de cancelar,
+        // transferir propiedad o modificar contadores. No silenciar buscar.
+        if (hash.buscar(id) != nullptr) {
             cout << "No se pudo eliminar el pedido del hash" << endl;
             return false;
         }
