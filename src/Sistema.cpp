@@ -210,7 +210,7 @@ public:
             candidato.release();
             return false;
         }
-        if (hash.buscar(p->idPedido) != nullptr) {
+        if (hash.buscar(p->idPedido, false) != nullptr) {
             candidato.release();
             return false;
         }
