@@ -1,10 +1,13 @@
+
+// #include <vector>
+using namespace std;
+
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "Utilidades.cpp"
 #include "Pedido.cpp"
-#pragma once          /* para que no se repitan cuando terminemos ponemos todo junto y se quita */
+#pragma once                   /* para que no se repitan cuando terminemos ponemos todo junto y se quita */
 
 using namespace std;
  
@@ -14,28 +17,23 @@ using namespace std;
 //  Encadenamiento (lista enlazada por bucket)
 // ============================================================
  
-#include <iostream>
-#include <string>
-#include "Pedido.cpp"
-
-using namespace std;
 
 // Estructura para los nodos de la lista enlazada
-struct NodoHash {
-    string idPedido;
-    Pedido* ped;
-    NodoHash* siguiente; // Puntero al siguiente nodo en caso de colisi-n
+struct HashNode {
+    string key;
+    Pedido* valor;
+    HashNode* next; // Puntero al siguiente nodo en caso de colisi-n
 
     // Constructor del nodo
-    NodoHash(string c, Pedido* v) {
-        idPedido = c;
-        ped = v;
-        siguiente = nullptr;
+    HashNode(string c, Pedido* v) {
+        key = c;
+        valor = v;
+        next = nullptr;
     }
 };
 
-class TablaHash {
-  NodoHash** tabla;//Puntero doble: Un arreglo de punteros a
+class HashTable {
+  HashNode** tabla;//Puntero doble: Un arreglo de punteros a
   int capacidad;
   // Funci-n hash privada
   int funcionHash(string idPedido) {
@@ -47,45 +45,56 @@ class TablaHash {
   }
     public:
     // Constructor
-      TablaHash(int cap) {
+      HashTable(int cap) {
         capacidad = cap;
-        tabla = new NodoHash*[capacidad];//Crear el arreglo de
+        tabla = new HashNode*[capacidad];//Crear el arreglo de
         // Inicializar todos los punteros a nullptr (vacios)
         for (int i = 0; i < capacidad; i++) {
           tabla[i] = nullptr;
         }
     }
 
-    void insertar(string idPedido, Pedido* ped) {
+    bool insertar(string idPedido, Pedido* ped) {
         int indice = funcionHash(idPedido);
-        NodoHash* nuevoNodo = new NodoHash(idPedido, ped);
 
-        // Si no hay colisi-n, es el primer elemento
+        // Si el id ya existe en este bucket, se rechaza
+        HashNode* actual = tabla[indice];
+        while (actual != nullptr) {
+            if (actual->key == idPedido) {
+                return false;
+            }
+            actual = actual->next;
+        }
+
+        HashNode* nuevoNodo = new HashNode(idPedido, ped);
+
+        // Si no hay colision, es el primer elemento
         if (tabla[indice] == nullptr) {
             tabla[indice] = nuevoNodo;
         } else {
-            // Manejo de colisi-n: Enlazar al inicio de la lista
-            nuevoNodo->siguiente = tabla[indice];
+            // Manejo de colision: Enlazar al inicio de la lista
+            nuevoNodo->next = tabla[indice];
             tabla[indice] = nuevoNodo;
         }
+        return true;
     }
 
     Pedido* buscar(string idPedido){
         int indice =funcionHash(idPedido);
-        NodoHash* actual = tabla[indice];
+        HashNode* actual = tabla[indice];
         while (actual != nullptr){
-            if (actual->idPedido == idPedido){
-                cout <<"Pedido ID: "<<actual->ped->idPedido<<endl
-                <<"DNI: "<<actual->ped->dniCliente<<endl
-                <<"Tipo Envio: "<<actual->ped->tipoEnvio<<endl
-                <<"Prioridad: "<<actual->ped->nivelPrioridad<<endl
-                <<"Monto: "<<actual->ped->montoDolares<<endl
-                <<"Fecha: "<<actual->ped->fecha<<endl
-                <<"Hora: "<<actual->ped->hora<<endl
-                <<"Estado: "<<actual->ped->estado<<endl;
-                return actual->ped;
+            if (actual->key == idPedido){
+                cout <<"Pedido ID: "<<actual->valor->idPedido<<endl
+                <<"DNI: "<<actual->valor->dniCliente<<endl
+                <<"Tipo Envio: "<<actual->valor->tipoEnvio<<endl
+                <<"Prioridad: "<<actual->valor->nivelPrioridad<<endl
+                <<"Monto: "<<actual->valor->montoDolares<<endl
+                <<"Fecha: "<<actual->valor->fecha<<endl
+                <<"Hora: "<<actual->valor->hora<<endl
+                <<"Estado: "<<actual->valor->estado<<endl;
+                return actual->valor;
             }
-            actual=actual->siguiente;
+            actual=actual->next;
         }
         cout <<"No encontrado"<<endl;
         return nullptr;
@@ -93,17 +102,17 @@ class TablaHash {
 
     void eliminar(string idPedido) {
         int indice = funcionHash(idPedido);
-        NodoHash* actual = tabla[indice];
-        NodoHash* anterior = nullptr;
+        HashNode* actual = tabla[indice];
+        HashNode* anterior = nullptr;
 
         while (actual != nullptr) {
-            if (actual->idPedido == idPedido) {
+            if (actual->key == idPedido) {
                 // Si el nodo a eliminar es el primero (cabeza de la lista)
                 if (anterior == nullptr) {
-                    tabla[indice] = actual->siguiente;
+                    tabla[indice] = actual->next;
                 } else {
                     // Si el nodo est- en medio o al final
-                    anterior->siguiente = actual->siguiente;
+                    anterior->next = actual->next;
                 }
 
                 delete actual; // Liberar memoria del puntero
@@ -112,7 +121,7 @@ class TablaHash {
             }
 
             anterior = actual;
-            actual = actual->siguiente;
+            actual = actual->next;
         }
 
         cout << "idPedido no encontrada para eliminar." << endl;
@@ -121,20 +130,20 @@ class TablaHash {
     int getCantidad(){
         int total = 0;
         for (int i = 0; i < capacidad; i++) {
-            NodoHash* actual = tabla[i];
+            HashNode* actual = tabla[i];
             while (actual != nullptr) {
                 total++;
-                actual = actual->siguiente;
+                actual = actual->next;
             }
         }
         return total;
     }
-    ~TablaHash() {
+    ~HashTable() {
         for (int i = 0; i < capacidad; i++) {
-            NodoHash* actual = tabla[i];
+            HashNode* actual = tabla[i];
             while (actual != nullptr) {
-                NodoHash* temporal = actual;
-                actual = actual->siguiente;
+                HashNode* temporal = actual;
+                actual = actual->next;
                 delete temporal; // Liberar cada nodo
             }
         }
@@ -145,27 +154,27 @@ class TablaHash {
         if (nuevaCapacidad <= capacidad) return; // Solo redimensionar si la nueva capacidad es mayor
 
         // Guardar la referencia a la tabla actual y su capacidad
-        NodoHash** tablaVieja = tabla;
+        HashNode** tablaVieja = tabla;
         int capacidadVieja = capacidad;
 
         // Actualizar la capacidad e inicializar la nueva tabla con nullptr
         capacidad = nuevaCapacidad;
-        tabla = new NodoHash*[capacidad];
+        tabla = new HashNode*[capacidad];
         for (int i = 0; i < capacidad; i++) {
             tabla[i] = nullptr;
         }
 
         // Reinsertar todos los nodos existentes en la nueva tabla
         for (int i = 0; i < capacidadVieja; i++) {
-            NodoHash* actual = tablaVieja[i];
+            HashNode* actual = tablaVieja[i];
             while (actual != nullptr) {
-                NodoHash* siguiente = actual->siguiente; // Guardar puntero al siguiente elemento
+                HashNode* siguiente = actual->next; // Guardar puntero al siguiente elemento
 
                 // Recalcular el índice con la nueva capacidad
-                int nuevoIndice = funcionHash(actual->idPedido);
+                int nuevoIndice = funcionHash(actual->key);
 
                 // Insertar al inicio de la lista en la nueva tabla
-                actual->siguiente = tabla[nuevoIndice];
+                actual->next = tabla[nuevoIndice];
                 tabla[nuevoIndice] = actual;
 
                 actual = siguiente;
