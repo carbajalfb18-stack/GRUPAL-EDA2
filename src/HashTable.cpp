@@ -37,7 +37,6 @@ struct NodoHash {
 class TablaHash {
   NodoHash** tabla;//Puntero doble: Un arreglo de punteros a
   int capacidad;
-  int colisiones; // Inserciones acumuladas que encontraron un bucket ocupado.
   // Funci-n hash privada
   int funcionHash(string idPedido) {
     int suma = 0;
@@ -50,7 +49,6 @@ class TablaHash {
     // Constructor
       TablaHash(int cap) {
         capacidad = cap;
-        colisiones = 0;
         tabla = new NodoHash*[capacidad];//Crear el arreglo de
         // Inicializar todos los punteros a nullptr (vacios)
         for (int i = 0; i < capacidad; i++) {
@@ -66,7 +64,6 @@ class TablaHash {
         if (tabla[indice] == nullptr) {
             tabla[indice] = nuevoNodo;
         } else {
-            ++colisiones;
             // Manejo de colisi-n: Enlazar al inicio de la lista
             nuevoNodo->siguiente = tabla[indice];
             tabla[indice] = nuevoNodo;
@@ -119,10 +116,6 @@ class TablaHash {
         }
 
         cout << "idPedido no encontrada para eliminar." << endl;
-    }
-
-    int getColisiones() {
-        return colisiones;
     }
 
     int getCantidad(){
