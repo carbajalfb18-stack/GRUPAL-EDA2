@@ -46,7 +46,6 @@ int funcionHash(string idPedido) {
     for (unsigned char c : idPedido) {
         indice = (indice * 131u + c) % capacidad;
     }
-
     return static_cast<int>(indice);
 }
 
@@ -77,7 +76,7 @@ int funcionHash(string idPedido) {
         }
     }
 
-    Pedido* buscar(string idPedido){
+    Pedido* buscar(string idPedido, bool mostrarMensaje = true){
         int indice =funcionHash(idPedido);
         NodoHash* actual = tabla[indice];
         while (actual != nullptr){
@@ -94,10 +93,11 @@ int funcionHash(string idPedido) {
             }
             actual=actual->siguiente;
         }
-        cout <<"No encontrado"<<endl;
-        return nullptr;
+        if (mostrarMensaje) {
+            cout << "No encontrado" << endl;
+        }
+        return nullptr; 
     }
-
     void eliminar(string idPedido) {
         int indice = funcionHash(idPedido);
         NodoHash* actual = tabla[indice];
