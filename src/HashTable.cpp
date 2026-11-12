@@ -39,16 +39,13 @@ class TablaHash {
   int capacidad;
   int colisiones; // Inserciones acumuladas que encontraron un bucket ocupado.
   // Funci-n hash privada
-
-int funcionHash(string idPedido) {
-    unsigned int indice = 0;
-
-    for (unsigned char c : idPedido) {
-        indice = (indice * 131u + c) % capacidad;
+  int funcionHash(string idPedido) {
+    int suma = 0;
+    for (char c : idPedido) {
+      suma += c;
     }
-    return static_cast<int>(indice);
-}
-
+    return suma % capacidad;//Asegura que el -ndice este en r
+  }
     public:
     // Constructor
       TablaHash(int cap) {
@@ -76,7 +73,7 @@ int funcionHash(string idPedido) {
         }
     }
 
-    Pedido* buscar(string idPedido, bool mostrarMensaje = true){
+    Pedido* buscar(string idPedido){
         int indice =funcionHash(idPedido);
         NodoHash* actual = tabla[indice];
         while (actual != nullptr){
@@ -93,11 +90,10 @@ int funcionHash(string idPedido) {
             }
             actual=actual->siguiente;
         }
-        if (mostrarMensaje) {
-            cout << "No encontrado" << endl;
-        }
-        return nullptr; 
+        cout <<"No encontrado"<<endl;
+        return nullptr;
     }
+
     void eliminar(string idPedido) {
         int indice = funcionHash(idPedido);
         NodoHash* actual = tabla[indice];
