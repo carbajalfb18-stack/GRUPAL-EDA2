@@ -184,5 +184,32 @@ class HashTable {
         // Liberar el arreglo de punteros antiguo (sin borrar los nodos ya resituados)
         delete[] tablaVieja;
     }
+    
+    // Libera los Pedido guardados (los nodos los libera el destructor)
+    void liberarPedidos() {
+        for (int i = 0; i < capacidad; i++) {
+            HashNode* actual = tabla[i];
+            while (actual != nullptr) {
+                delete actual->valor;
+                actual->valor = nullptr;
+                actual = actual->next;
+            }
+        }
+    }
+
+    // Colisiones = elementos que quedaron detras del primero de su bucket
+    int getColisiones() {
+        int colisiones = 0;
+        for (int i = 0; i < capacidad; i++) {
+            HashNode* actual = tabla[i];
+            if (actual == nullptr) continue;
+            actual = actual->next;
+            while (actual != nullptr) {
+                colisiones++;
+                actual = actual->next;
+            }
+        }
+        return colisiones;
+    }
 
 };

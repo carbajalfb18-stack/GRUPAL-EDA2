@@ -32,7 +32,7 @@ public:
     }
  
     ~Sistema() {
-        // hash.liberarPedidos();   // TODO: el hash todavia no tiene esta funcion
+        hash.liberarPedidos();   // TODO: el hash todavia no tiene esta funcion
         //       (los cancelados los libera el heap al extraerlos)
     }
  
@@ -152,7 +152,6 @@ public:
     }
  
     int getColisiones() {
-        // return hash.getColisiones();   // TODO: el hash todavia no tiene esta funcion
-        return 0;
+        return hash.getColisiones(); 
     }
 };
