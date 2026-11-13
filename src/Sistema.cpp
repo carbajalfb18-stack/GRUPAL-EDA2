@@ -19,7 +19,7 @@ using namespace std;
  
 class Sistema {
 private:
-    TablaHash     hash;
+    HashTable     hash;
     MaxHeap       heap;
     ArbolRedBlack arbol;
     int           totalPedidos;
@@ -32,7 +32,7 @@ public:
     }
  
     ~Sistema() {
-        hash.liberarPedidos();  
+        // hash.liberarPedidos();   // TODO: el hash todavia no tiene esta funcion
         //       (los cancelados los libera el heap al extraerlos)
     }
  
@@ -67,8 +67,13 @@ public:
             return false;
         }
 
-        hash.insertar(p->idPedido,p);
+            if(!hash.insertar(p->idPedido, p)) {
+            delete p;
+            return false;
+        }
+        
         heap.insertar(p);
+        arbol.insertar(p);
         totalPedidos++;
         montoAcumulado += p->montoDolares;   // suma los montos de los pedidos registrados
 
@@ -93,7 +98,7 @@ public:
                 return;
             }
             
-            p->estado = "ESTADO_TRANSITO";
+            p->estado = ESTADO_TRANSITO;
             mostrarPedido(p);
       
         }
@@ -133,7 +138,7 @@ public:
         hash.eliminar(id);
         arbol.eliminar(p);
 
-        p->estado = "ESTADO_CANCELADO";
+        p->estado = ESTADO_CANCELADO;
         totalPedidos--;
         montoAcumulado -= p->montoDolares;  
 
@@ -147,6 +152,7 @@ public:
     }
  
     int getColisiones() {
-        return hash.getColisiones();
+        // return hash.getColisiones();   // TODO: el hash todavia no tiene esta funcion
+        return 0;
     }
 };
