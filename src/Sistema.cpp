@@ -83,7 +83,14 @@ public:
         if(p == nullptr){
             cout << "Pedido no encontrado" << endl;
         } else {
-            mostrarPedido(p);
+            cout << "Pedido ID: " << p->idPedido << endl
+                 << "DNI: " << p->dniCliente << endl
+                 << "Tipo Envio: " << p->tipoEnvio << endl
+                 << "Prioridad: " << p->nivelPrioridad << endl
+                 << "Monto: " << p->montoDolares << endl
+                 << "Fecha: " << p->fecha << endl
+                 << "Hora: " << p->hora << endl
+                 << "Estado: " << p->estado << endl;
         }
     }
  
@@ -110,7 +117,7 @@ public:
         int cantidad = 0;
         double montoTotal = 0.0;
 
-        arbol.consultaRango(claveInicioDia(fechaIni), claveFinDia(fechaFin), cantidad, montoTotal);
+        calcularRango(fechaIni, fechaFin, cantidad, montoTotal);
         cout << "Cantidad de pedidos: " << cantidad << endl;
 
         cout << "Monto total: " << montoTotal << endl;
@@ -145,10 +152,34 @@ public:
  
     void mostrarEstadisticas() {
         cout << "Total de pedidos: " << totalPedidos << endl;
-        cout << "Pendiente por revision: " << heap.getTamano() << endl;
+        cout << "Pendientes por despachar: " << heap.getTamano() << endl;
         cout << "Monto total acumulado: " << montoAcumulado << endl;
     }
  
+    // Versiones "silenciosas": no imprimen nada, sirven para las pruebas de tiempo
+    Pedido* obtenerPedido(const string& id) {
+        return hash.buscar(id);
+    }
+
+    void calcularRango(const string& fechaIni, const string& fechaFin, int& cantidad, double& montoTotal) {
+        cantidad = 0;
+        montoTotal = 0.0;
+        arbol.consultaRango(claveInicioDia(fechaIni), claveFinDia(fechaFin), cantidad, montoTotal);
+    }
+
+    int despacharSinMostrar(int n) {
+        int despachados = 0;
+        while (despachados < n) {
+            Pedido* p = heap.extraerMax();
+            if (p == nullptr) {
+                return despachados;
+            }
+            p->estado = ESTADO_TRANSITO;
+            despachados++;
+        }
+        return despachados;
+    }
+
     int getColisiones() {
         return hash.getColisiones();
     }
