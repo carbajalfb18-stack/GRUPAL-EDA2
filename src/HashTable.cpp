@@ -77,14 +77,6 @@ class HashTable {
         HashNode* actual = tabla[indice];
         while (actual != nullptr){
             if (actual->key == idPedido){
-                cout <<"Pedido ID: "<<actual->valor->idPedido<<endl
-                <<"DNI: "<<actual->valor->dniCliente<<endl
-                <<"Tipo Envio: "<<actual->valor->tipoEnvio<<endl
-                <<"Prioridad: "<<actual->valor->nivelPrioridad<<endl
-                <<"Monto: "<<actual->valor->montoDolares<<endl
-                <<"Fecha: "<<actual->valor->fecha<<endl
-                <<"Hora: "<<actual->valor->hora<<endl
-                <<"Estado: "<<actual->valor->estado<<endl;
                 return actual->valor;
             }
             actual=actual->next;
