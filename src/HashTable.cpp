@@ -31,11 +31,7 @@ class HashTable {
   int colisiones;
   // convierte el id en una posición de la tabla
   int funcionHash(string idPedido) {
-    int suma = 0;
-    for (char c : idPedido) {
-      suma += c;
-    }
-    return suma % capacidad;
+    return (int)(hashString(idPedido) % capacidad);;
   }
     public:
       HashTable(int cap) {
