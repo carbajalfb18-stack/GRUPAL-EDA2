@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <fstream> // leer archivo csv
+#include <fstream> // para leer el archivo csv
 using namespace std;
 
 #include "Utilidades.cpp"
@@ -11,10 +11,9 @@ using namespace std;
 #pragma once 
  
 // ============================================================
-//  Sistema.cpp  -  depende de: HashTable, MaxHeap, RedBlackTree, Utilidades
-//  Es el ÚNICO que conoce las 3 estructuras.
-//  Dueño de los Pedido (único que hace delete, junto con el heap al
-//  descartar cancelados) y de los contadores.
+//  Sistema.cpp
+//  Junta el hash, el heap y el árbol. Es el dueño de los pedidos:
+//  solo aquí (y el heap, al sacar los cancelados) se hace delete.
 // ============================================================
  
 class Sistema {
@@ -32,13 +31,13 @@ public:
     }
  
     ~Sistema() {
-        hash.liberarPedidos();   // TODO: el hash todavia no tiene esta funcion
-        //       (los cancelados los libera el heap al extraerlos)
+        hash.liberarPedidos();
+        // los cancelados los libera el heap cuando los saca
     }
  
     int cargarCSV(const string& ruta) {
-        ifstream archivo;                      // Abre el archivo CSV    algo nuevo para mi
-        archivo.open(ruta.c_str());           // c_str() convierte string a const char* para open()
+        ifstream archivo;  // para leer el archivo línea por línea
+        archivo.open(ruta.c_str());  // c_str() solo pasa la ruta al formato que pide open()
         if (!archivo.is_open()) {
             cout << "No se pudo abrir el archivo: " << ruta << endl;
             return 0;
@@ -67,15 +66,14 @@ public:
             return false;
         }
 
-            if(!hash.insertar(p->idPedido, p)) {
+        if(!hash.insertar(p->idPedido, p)) {
             delete p;
             return false;
         }
-        
         heap.insertar(p);
         arbol.insertar(p);
         totalPedidos++;
-        montoAcumulado += p->montoDolares;   // suma los montos de los pedidos registrados
+        montoAcumulado += p->montoDolares;
 
         return true;
     }
@@ -105,7 +103,7 @@ public:
     }
  
     void consultaOrdenada() {
-        arbol.inOrder(30);  // 0 significa sin límite si hay fallas modificar el inOrderHelper 
+        arbol.inOrder(30);  // muestra solo los primeros 30 (con 0 saldrían todos)
     }
  
     void consultaRango(const string& fechaIni, const string& fechaFin) {
@@ -152,6 +150,6 @@ public:
     }
  
     int getColisiones() {
-        return hash.getColisiones(); 
+        return hash.getColisiones();
     }
 };

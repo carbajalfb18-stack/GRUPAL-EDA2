@@ -1,30 +1,23 @@
-
-// #include <vector>
-using namespace std;
-
 #include <iostream>
 #include <string>
 
 #include "Utilidades.cpp"
 #include "Pedido.cpp"
-#pragma once                   /* para que no se repitan cuando terminemos ponemos todo junto y se quita */
+#pragma once  // se quita cuando juntemos todo en un solo main
 
 using namespace std;
  
 // ============================================================
-//  HashTable.cpp  -  depende de: Pedido, Utilidades
-//  Basado en el hash del profe (HashNode, tabla, capacidad, rehash)
-//  Encadenamiento (lista enlazada por bucket)
+//  HashTable.cpp
+//  Busca pedidos por su id. Si dos ids caen en la misma posición
+//  (colisión), se guardan uno detrás de otro en una cadena.
 // ============================================================
  
-
-// Estructura para los nodos de la lista enlazada
 struct HashNode {
     string key;
     Pedido* valor;
-    HashNode* next; // Puntero al siguiente nodo en caso de colisi-n
+    HashNode* next;
 
-    // Constructor del nodo
     HashNode(string c, Pedido* v) {
         key = c;
         valor = v;
@@ -33,22 +26,22 @@ struct HashNode {
 };
 
 class HashTable {
-  HashNode** tabla;//Puntero doble: Un arreglo de punteros a
+  HashNode** tabla;
   int capacidad;
-  // Funci-n hash privada
+  int colisiones;
+  // convierte el id en una posición de la tabla
   int funcionHash(string idPedido) {
     int suma = 0;
     for (char c : idPedido) {
       suma += c;
     }
-    return suma % capacidad;//Asegura que el -ndice este en r
+    return suma % capacidad;
   }
     public:
-    // Constructor
       HashTable(int cap) {
         capacidad = cap;
-        tabla = new HashNode*[capacidad];//Crear el arreglo de
-        // Inicializar todos los punteros a nullptr (vacios)
+        colisiones = 0;
+        tabla = new HashNode*[capacidad];
         for (int i = 0; i < capacidad; i++) {
           tabla[i] = nullptr;
         }
@@ -57,7 +50,7 @@ class HashTable {
     bool insertar(string idPedido, Pedido* ped) {
         int indice = funcionHash(idPedido);
 
-        // Si el id ya existe en este bucket, se rechaza
+        // si el id ya existe, no se guarda
         HashNode* actual = tabla[indice];
         while (actual != nullptr) {
             if (actual->key == idPedido) {
@@ -68,11 +61,11 @@ class HashTable {
 
         HashNode* nuevoNodo = new HashNode(idPedido, ped);
 
-        // Si no hay colision, es el primer elemento
         if (tabla[indice] == nullptr) {
             tabla[indice] = nuevoNodo;
         } else {
-            // Manejo de colision: Enlazar al inicio de la lista
+            // ya había pedidos en esa posición (colisión): lo pongo al inicio de la cadena
+            colisiones++;
             nuevoNodo->next = tabla[indice];
             tabla[indice] = nuevoNodo;
         }
@@ -107,15 +100,13 @@ class HashTable {
 
         while (actual != nullptr) {
             if (actual->key == idPedido) {
-                // Si el nodo a eliminar es el primero (cabeza de la lista)
                 if (anterior == nullptr) {
                     tabla[indice] = actual->next;
                 } else {
-                    // Si el nodo est- en medio o al final
                     anterior->next = actual->next;
                 }
 
-                delete actual; // Liberar memoria del puntero
+                delete actual;
                 cout << "idPedido " << idPedido << " eliminada." << endl;
                 return;
             }
@@ -125,6 +116,20 @@ class HashTable {
         }
 
         cout << "idPedido no encontrada para eliminar." << endl;
+    }
+
+    int getColisiones(){
+        return colisiones;
+    }
+
+    void liberarPedidos(){
+        for (int i = 0; i < capacidad; i++) {
+            HashNode* actual = tabla[i];
+            while (actual != nullptr) {
+                delete actual->valor;
+                actual = actual->next;
+            }
+        }
     }
 
     int getCantidad(){
@@ -144,36 +149,31 @@ class HashTable {
             while (actual != nullptr) {
                 HashNode* temporal = actual;
                 actual = actual->next;
-                delete temporal; // Liberar cada nodo
+                delete temporal;
             }
         }
-        delete[] tabla; // Liberar el arreglo din-mico de punteros
+        delete[] tabla;
     }
 
     void rehash(int nuevaCapacidad) {
-        if (nuevaCapacidad <= capacidad) return; // Solo redimensionar si la nueva capacidad es mayor
+        if (nuevaCapacidad <= capacidad) return;  // solo sirve para agrandar la tabla
 
-        // Guardar la referencia a la tabla actual y su capacidad
         HashNode** tablaVieja = tabla;
         int capacidadVieja = capacidad;
 
-        // Actualizar la capacidad e inicializar la nueva tabla con nullptr
         capacidad = nuevaCapacidad;
         tabla = new HashNode*[capacidad];
         for (int i = 0; i < capacidad; i++) {
             tabla[i] = nullptr;
         }
 
-        // Reinsertar todos los nodos existentes en la nueva tabla
         for (int i = 0; i < capacidadVieja; i++) {
             HashNode* actual = tablaVieja[i];
             while (actual != nullptr) {
-                HashNode* siguiente = actual->next; // Guardar puntero al siguiente elemento
+                HashNode* siguiente = actual->next;  // lo guardo porque voy a mover este nodo
 
-                // Recalcular el índice con la nueva capacidad
                 int nuevoIndice = funcionHash(actual->key);
 
-                // Insertar al inicio de la lista en la nueva tabla
                 actual->next = tabla[nuevoIndice];
                 tabla[nuevoIndice] = actual;
 
@@ -181,35 +181,8 @@ class HashTable {
             }
         }
 
-        // Liberar el arreglo de punteros antiguo (sin borrar los nodos ya resituados)
+        // borro solo el arreglo viejo; los nodos ya se movieron a la tabla nueva
         delete[] tablaVieja;
-    }
-    
-    // Libera los Pedido guardados (los nodos los libera el destructor)
-    void liberarPedidos() {
-        for (int i = 0; i < capacidad; i++) {
-            HashNode* actual = tabla[i];
-            while (actual != nullptr) {
-                delete actual->valor;
-                actual->valor = nullptr;
-                actual = actual->next;
-            }
-        }
-    }
-
-    // Colisiones = elementos que quedaron detras del primero de su bucket
-    int getColisiones() {
-        int colisiones = 0;
-        for (int i = 0; i < capacidad; i++) {
-            HashNode* actual = tabla[i];
-            if (actual == nullptr) continue;
-            actual = actual->next;
-            while (actual != nullptr) {
-                colisiones++;
-                actual = actual->next;
-            }
-        }
-        return colisiones;
     }
 
 };
