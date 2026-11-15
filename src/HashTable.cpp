@@ -77,7 +77,7 @@ class HashTable {
             }
             actual=actual->next;
         }
-        cout <<"No encontrado"<<endl;
+        //cout <<"No encontrado"<<endl;
         return nullptr;
     }
 
